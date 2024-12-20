@@ -19,7 +19,7 @@ func main() {
 	// Use apkutils to read the index. The second argument specifies where to look for the public keys used to
 	// verify the index signature. apkutil bundles these keys for convenience, but you can implement your own
 	// KeyProvider if you have an alternative source (such as /usr/share/apk/keys/ on alpine systems).
-	packages, err := apkutils.ReadApkIndex(res.Body, apkutils.NewFileSystemKeyProvider(keys.X86_64))
+	packages, err := apkutils.ReadApkIndex(res.Body, keys.X86_64)
 	if err != nil {
 		log.Fatal(err)
 	}

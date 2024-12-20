@@ -29,7 +29,7 @@ func packages() map[string]*apkutils.PackageInfo {
 	}
 	defer r.Body.Close()
 
-	res, err := apkutils.ReadApkIndex(r.Body, apkutils.NewFileSystemKeyProvider(keys.X86_64))
+	res, err := apkutils.ReadApkIndex(r.Body, keys.X86_64)
 	if err != nil {
 		log.Fatal(err)
 	}
