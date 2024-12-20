@@ -11,8 +11,6 @@ import (
 	"encoding/pem"
 	"io"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -37,7 +35,7 @@ func NewFileSystemKeyProvider(fs fs.FS) KeyProvider {
 }
 
 func (f *fileSystemKeyProvider) Key(name string) (*rsa.PublicKey, error) {
-	b, err := os.ReadFile(name)
+	b, err := fs.ReadFile(f.fs, name)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +75,7 @@ func Verify(reader io.Reader, keyProvider KeyProvider) error {
 		return err
 	}
 
-	publicKey, err := keyProvider.Key(filepath.Join("keys", key))
+	publicKey, err := keyProvider.Key(key)
 	if err != nil {
 		return err
 	}
