@@ -2,7 +2,7 @@ package keys
 
 import (
 	"embed"
-	"github.com/csmith/apkutils"
+	"github.com/csmith/apkutils/v2"
 )
 
 // Correct as of aports revision 6d473fb38effb2389f567b29fb7eb27039b3a279

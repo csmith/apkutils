@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/csmith/apkutils"
-	"github.com/csmith/apkutils/keys"
+	"github.com/csmith/apkutils/v2"
+	"github.com/csmith/apkutils/v2/keys"
 	"log"
 	"net/http"
 )
