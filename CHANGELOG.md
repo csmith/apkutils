@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.2 - 2025-12-17
+
+- Fixed issue with `FlattenDependencies` occasionally infinitely looping when
+  resolving dependencies with `pc:` constraints. Thanks @Greboid for the report.
+
 ## 2.1.1 - 2025-08-25 
 
 ### Changes

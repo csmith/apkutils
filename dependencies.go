@@ -14,12 +14,6 @@ func FlattenDependencies(packages map[string]*PackageInfo, names ...string) (map
 	queue := append([]string{}, names...)
 
 	for len(queue) > 0 {
-		if _, ok := res[queue[0]]; ok {
-			// We've already got a resolution for this package, skip it.
-			queue = queue[1:]
-			continue
-		}
-
 		if strings.HasPrefix(queue[0], "!") {
 			//Package conflict, skip it
 			queue = queue[1:]
@@ -29,6 +23,12 @@ func FlattenDependencies(packages map[string]*PackageInfo, names ...string) (map
 		p, ok := packages[queue[0]]
 		if !ok {
 			return nil, fmt.Errorf("package required but not found: %s", queue[0])
+		}
+
+		if _, ok := res[p.Name]; ok {
+			// We've already got a resolution for this package, skip it.
+			queue = queue[1:]
+			continue
 		}
 
 		queue = append(queue[1:], p.Dependencies...)
