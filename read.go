@@ -118,7 +118,7 @@ func extractPkgInfo(tarBytes []byte) (map[string]string, error) {
 			continue
 		}
 
-		parts := strings.SplitN(scan.Text(), " = ", 2)
+		parts := strings.SplitN(line, " = ", 2)
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("invalid pkginfo line: %s", line)
 		}
