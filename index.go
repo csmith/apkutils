@@ -11,6 +11,29 @@ import (
 // ReadApkIndex verifies the embedded signature in the file, then extracts
 // and parses the APKINDEX contents.
 func ReadApkIndex(reader io.Reader, keyProvider KeyProvider) (map[string]*PackageInfo, error) {
+	entries, err := ReadApkIndexEntries(reader, keyProvider)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make(map[string]*PackageInfo)
+	for _, entry := range entries {
+		res[entry.Name] = entry
+		for i := range entry.Provides {
+			// Don't overwrite real packages with provides info
+			if _, ok := res[entry.Provides[i]]; !ok {
+				res[entry.Provides[i]] = entry
+			}
+		}
+	}
+
+	return res, nil
+}
+
+// ReadApkIndexEntries verifies the embedded signature in the file, then
+// extracts and parses the APKINDEX contents, returning every package entry
+// in the order they appear in the file.
+func ReadApkIndexEntries(reader io.Reader, keyProvider KeyProvider) ([]*PackageInfo, error) {
 	tarBytes, _, err := read(reader, keyProvider)
 	if err != nil {
 		return nil, err
@@ -21,31 +44,31 @@ func ReadApkIndex(reader io.Reader, keyProvider KeyProvider) (map[string]*Packag
 		return nil, err
 	}
 
-	return readApkIndexContent(bytes.NewReader(indexBytes))
+	return readApkIndexEntries(bytes.NewReader(indexBytes))
 }
 
-// readApkIndexContent reads an APKINDEX file, parsing out the contained packages.
-func readApkIndexContent(reader io.Reader) (map[string]*PackageInfo, error) {
-	res := make(map[string]*PackageInfo)
+// readApkIndexEntries reads an APKINDEX file, parsing out every contained
+// package entry in file order.
+func readApkIndexEntries(reader io.Reader) ([]*PackageInfo, error) {
+	var res []*PackageInfo
 	scanner := bufio.NewScanner(reader)
 	buf := make([]byte, 0, 1024*1024)
 	scanner.Buffer(buf, 1024*1024)
 
 	current := &PackageInfo{}
+	started := false
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
-			res[current.Name] = current
-
-			for i := range current.Provides {
-				// Don't overwrite real packages with provides info
-				if _, ok := res[current.Provides[i]]; !ok {
-					res[current.Provides[i]] = current
-				}
+			if started {
+				res = append(res, current)
 			}
-
 			current = &PackageInfo{}
-		} else if strings.HasPrefix(line, "P:") {
+			started = false
+			continue
+		}
+		started = true
+		if strings.HasPrefix(line, "P:") {
 			current.Name = strings.TrimPrefix(line, "P:")
 		} else if strings.HasPrefix(line, "D:") {
 			d := strings.Fields(strings.TrimPrefix(line, "D:"))
@@ -64,6 +87,10 @@ func readApkIndexContent(reader io.Reader) (map[string]*PackageInfo, error) {
 
 	if scanner.Err() != nil {
 		return nil, fmt.Errorf("unable to read index: %v", scanner.Err())
+	}
+
+	if started {
+		res = append(res, current)
 	}
 
 	return res, nil
