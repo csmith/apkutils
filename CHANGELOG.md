@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changes
+
+-  Add ReadApkIndexEntries to read every entry in an APKINDEX, Official 
+   repository only has a single version, but third party repositories 
+   can have multiple versions, this function exposes all of them.
+
 ## 2.1.2 - 2025-12-17
 
 - Fixed issue with `FlattenDependencies` occasionally infinitely looping when
